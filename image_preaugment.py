@@ -135,8 +135,9 @@ class ImageLoader(object):
             if original:
                 train = train.resize((self._data[2][i]), Image.ANTIALIAS)
                 label = label.resize((self._data[2][i]), Image.ANTIALIAS)
-            train.save(os.path.join(self._train_dir, (str(i) + ".jpg")))
-            label.save(os.path.join(self._label_dir, (str(i) +".png")))
+            number_padded = '{0:03d}'.format(i)
+            train.save(os.path.join(self._train_dir, ("train_" + number_padded + ".jpg")))
+            label.save(os.path.join(self._label_dir, ("train_" + number_padded + ".png")))
 
     def flipud_images(self, num):
         for i in range(num):
@@ -157,5 +158,5 @@ class ImageLoader(object):
 if __name__ == "__main__":
     dataset_ImageLoader = ImageLoader(dir_original="./data_set/train_images",
                             dir_segmented="./data_set/train_annotations",
-                            init_size=(1080, 1080))
+                            init_size=(256, 256))
     dataset_ImageLoader.save_augmented_image(original=False)
