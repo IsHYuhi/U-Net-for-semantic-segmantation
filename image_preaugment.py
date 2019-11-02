@@ -27,9 +27,9 @@ CATEGORY = (
 class ImageLoader(object):
     ROOT_DIR = "augmented_images"
     TRAIN = "train_images"
-    LABEL = "label_images"
+    LABEL = "train_annotations"
 
-    def __init__(self, dir_original, dir_segmented, init_size=(128, 128), one_hot=False):
+    def __init__(self, dir_original, dir_segmented, init_size=(512, 512), one_hot=False):
         self._data = ImageLoader.import_data(dir_original, dir_segmented, init_size, one_hot)
         self._root_dir = self.ROOT_DIR
         self._train_dir = os.path.join(self._root_dir, self.TRAIN)
@@ -67,7 +67,7 @@ class ImageLoader(object):
         print(" Done", flush=True)
 
         print("Loading label images", end="", flush=True)
-        for image, _ in ImageLoader.image_generator(paths_segmented, init_size, normalization=False):
+        for image, _ in ImageLoader.image_generator(paths_segmented, init_size):
             images_segmented.append(image)
 
         print(" Done")
@@ -103,27 +103,22 @@ class ImageLoader(object):
         return paths_original, paths_segmented
 
     @staticmethod
-    def image_generator(file_paths, init_size=None, normalization=False, antialias=False):#normalizationはFalse
+    def image_generator(file_paths, init_size=None,antialias=False):
         for file_path in file_paths:
             if file_path.endswith(".png") or file_path.endswith(".jpg"):
-                # open a image
                 image = Image.open(file_path)
-                # save original size
                 original_size = (image.width, image.height)
-                #print(original_size)
-                image = image.resize(init_size)
-                # resize by init_size
-                if init_size is not None and init_size != image.size:
-                    if antialias:
-                        image = image.resize(init_size, Image.ANTIALIAS)
-                    else:
-                        image = image.resize(init_size)
+
+                #ラベルはアンチエイリアスしない
+                if antialias:
+                    image = image.resize(init_size, Image.ANTIALIAS)
+                else:
+                    image = image.resize(init_size)
+
                 # alpha channelを削除
                 if image.mode == "RGBA":
                     image = image.convert("RGB")
                 image = np.asarray(image)
-                if normalization: #normalizeは無し
-                    image = image / 255.0
                 yield image, original_size
 
     def save_augmented_image(self, original=True):#train:jpg, label:png
@@ -158,5 +153,5 @@ class ImageLoader(object):
 if __name__ == "__main__":
     dataset_ImageLoader = ImageLoader(dir_original="./data_set/train_images",
                             dir_segmented="./data_set/train_annotations",
-                            init_size=(256, 256))
+                            init_size=(512, 512))
     dataset_ImageLoader.save_augmented_image(original=False)
