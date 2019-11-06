@@ -166,7 +166,7 @@ class ImageLoader(object):
 
     def random_crop_images(self, num):
         for i in range(num):
-            cropped, cropped_label = self.random_crop(self._data[0][i], self._data[1][i], crop_size=(1024, 1024))
+            cropped, cropped_label = self.random_crop(self._data[0][i], self._data[1][i], crop_size=(512, 512))
             cropped = cropped[np.newaxis,:,:]
             cropped_label = cropped_label[np.newaxis,:,:]#datasetに結合するための次元を作成
             self._data[0] = np.append(self._data[0], cropped, axis=0)
@@ -190,7 +190,7 @@ class ImageLoader(object):
             self._data[0] = np.append(self._data[0], noised, axis=0)
             self._data[1] = np.append(self._data[1], noised_label, axis=0)
 
-    def random_crop(self, image, label, crop_size=(1024, 1024)):
+    def random_crop(self, image, label, crop_size=(512, 512)):
         h, w = image.shape
 
         #画像のtop, leftを決める
@@ -211,7 +211,7 @@ class ImageLoader(object):
 
         #datasetのサイズに　resize
         image = image.resize(self._init_size, Image.ANTIALIAS)
-        label = label.resize(self._init_size, Image.ANTIALIAS)
+        label = label.resize(self._init_size)
 
         #ndarrayに変換
         image = np.asarray(image, dtype=np.float32)
@@ -224,7 +224,7 @@ class ImageLoader(object):
         return image
 
     def change_contrast(self, image):
-        s = random.uniform(0.2, 0.8)
+        s = random.uniform(0.2, 1)
         e = random.uniform(1.0, 1.5)
         blurer = iaa.ContrastNormalization((s, e))
         image = blurer.augment_image(image)
@@ -233,5 +233,5 @@ class ImageLoader(object):
 if __name__ == "__main__":
     dataset_ImageLoader = ImageLoader(dir_original="./data_set/train_images",
                             dir_segmented="./data_set/train_annotations",
-                            init_size=(1024, 1024))
+                            init_size=(512, 512))
     dataset_ImageLoader.save_augmented_image(original=False)
