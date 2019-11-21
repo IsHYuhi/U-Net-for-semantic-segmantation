@@ -66,9 +66,7 @@ def train(parser):
     batch_size = parser.batchsize
     is_augment = parser.augmentation
 
-    #入力データはグレースケールなのでチャネルの分の次元を追加
-    # train_images_original = train.images_original
-    # train_images_original = train_images_original[:,:,:, np.newaxis]　#シャッフルされた後に記述
+
     v_images_original = valid.images_original
     v_images_original = v_images_original[:,:,:, np.newaxis]
     t_images_original = test.images_original
@@ -99,6 +97,8 @@ def train(parser):
 
             sess.run(train_step, feed_dict={model_unet.inputs: inputs, model_unet.teacher: teacher,
                                             model_unet.is_training: True})
+
+        #入力データはグレースケールなのでチャネルの分の次元を追加
         train_images_original = train.images_original
         train_images_original = train_images_original[:,:,:, np.newaxis]
 
@@ -141,23 +141,17 @@ def train(parser):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(
-        prog='Image segmentation using U-Net',
-        usage='python main.py',
-        description='This module demonstrates image segmentation using U-Net.',
-        add_help=True
-    )
-
-    parser.add_argument('-g', '--gpu', action='store_true', help='Using GPUs')
-    parser.add_argument('-e', '--epoch', type=int, default=50, help='Number of epochs')
-    parser.add_argument('-b', '--batchsize', type=int, default=4, help='Batch size')
-    parser.add_argument('-t', '--trainrate', type=float, default=0.7, help='Training rate')
-    parser.add_argument('-a', '--augmentation', action='store_true', help='Number of epochs')
-    parser.add_argument('-r', '--l2reg', type=float, default=0.0001, help='L2 regularization')
-
-    return parser
+     args = easydict.EasyDict({
+        "batchsize": 2,
+        "epoch": 300,
+        "gpu": True,
+        "augmentation":False,
+        "l2reg":0.0001,
+        "trainrate":0.998
+    })
+    return args #parser.parse_args()
 
 
 if __name__ == '__main__':
-    parser = get_parser().parse_args()
+    parser = get_parser()#.parse_args()
     train(parser)
