@@ -3,14 +3,15 @@ import random
 import tensorflow as tf
 import numpy as np
 import os
-import yaml
+import easydict
+#import yaml
 
 from util import loader as ld
 from util import model
 from util import repoter as rp
 
 #imageの枚数 TODO
-NUM = 640
+NUM = 10
 #restoreするかどうか
 CONTINUE = False
 #check pointをセーブするかどうか
@@ -31,7 +32,7 @@ def train(parser):
 
     train, test = load_dataset(train_rate=parser.trainrate)
     valid = test.devide(0, int(NUM*0.1))
-    test = test.devide(int(NUM*0.1), int(NUM*0.3))
+    test = test.devide(int(NUM*0.1), int(NUM*0.2))
 
     #保存ファイル
     reporter = rp.Reporter(parser=parser)
@@ -87,7 +88,7 @@ def train(parser):
             saver.restore(sess, "./checkpoint/"+ RESTORE_MODEL)
 
     for epoch in range(epochs):
-        for batch in train(batch_size=batch_size, augment=is_augment):#ここでtrainがシャッフルされる
+        for batch in train(batch_size=batch_size):#ここでtrainがシャッフルされる
             # バッチデータ
             images_original = batch.images_original
             if not is_augment:
@@ -114,8 +115,8 @@ def train(parser):
             accuracy_fig.add([accuracy_train, accuracy_test], is_update=True)
             loss_fig.add([loss_train, loss_test], is_update=True)
             if epoch % 1 == 0:
-                idx_train = random.randrange(NUM*0.7)#trainサイズ
-                idx_test = random.randrange(NUM*0.2)#validationとtestが24個しかない
+                idx_train = random.randrange(NUM*0.8)#trainサイズ
+                idx_test = random.randrange(NUM*0.1)#validationとtest
                 outputs_train = sess.run(model_unet.outputs,
                                          feed_dict={model_unet.inputs: [train_images_original[idx_train]],
                                                     model_unet.is_training: False})
@@ -141,13 +142,13 @@ def train(parser):
 
 
 def get_parser():
-     args = easydict.EasyDict({
+    args = easydict.EasyDict({
         "batchsize": 2,
         "epoch": 300,
         "gpu": True,
         "augmentation":False,
         "l2reg":0.0001,
-        "trainrate":0.998
+        "trainrate":0.8
     })
     return args #parser.parse_args()
 

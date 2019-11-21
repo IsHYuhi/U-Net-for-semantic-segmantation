@@ -126,7 +126,7 @@ class Loader(object):
         '''
         for file_path in file_paths:
             if file_path.endswith(".png") or file_path.endswith(".jpg"):
-                
+
                 image = Image.open(file_path)
                 original_size = (image.width, image.height)
 
@@ -136,7 +136,7 @@ class Loader(object):
                     image = image.resize(init_size, Image.ANTIALIAS)
                 else:
                     image = image.resize(init_size)
-                
+
                 # delete alpha channel
                 if image.mode == "RGBA":
                     image = image.convert("RGB")
@@ -208,7 +208,7 @@ class DataSet(object):
     def __add__(self, other):
         images_original = np.concatenate([self.images_original, other.images_original])
         images_segmented = np.concatenate([self.images_segmented, other.images_segmented])
-        return DataSet(images_original, images_segmented, self._image_palette, self._augmenter)
+        return DataSet(images_original, images_segmented, self._image_palette)
 
     def shuffle(self):
         idx = np.arange(self._images_original.shape[0])

@@ -48,7 +48,6 @@ class Reporter:
         os.makedirs(self._image_train_dir)
         os.makedirs(self._image_test_dir)
         os.makedirs(self._learning_dir)
-        os.makedirs(self._info_dir)
 
         os.makedirs(self._each_image_dir)
         os.makedirs(self._pred_dir)
