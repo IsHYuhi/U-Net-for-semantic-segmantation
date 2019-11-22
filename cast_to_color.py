@@ -21,9 +21,9 @@ for i in range(3*11+1, 3*11+2, 3):
 for i in range(3*12, 3*12+1, 3):
     palette[i] = 255
 
-print(palette)
+#print(palette)
 
-for i in range(1):
+for i in range(80):
     num ='{0:02d}'.format(i)
     label = Image.open('./data_set/train_annotations/train_'+num+'.png')
     label = label.resize((1024, 1024))#リサイズ
