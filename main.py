@@ -10,8 +10,6 @@ from util import loader as ld
 from util import model
 from util import repoter as rp
 
-#imageの枚数 TODO
-NUM = 10
 #restoreするかどうか
 CONTINUE = False
 #check pointをセーブするかどうか
@@ -21,18 +19,25 @@ SAVE = True
 RESTORE_MODEL = "save_model_done.ckpt"
 
 
-def load_dataset(train_rate):
+def load_dataset(train_rate, size=(128, 128)):
     loader = ld.Loader(dir_original="data_set/train_images",
                        dir_segmented="data_set/train_annotations",
-                       init_size=(128, 128))
+                       init_size=size)
     return loader.load_train_test(train_rate=train_rate, shuffle=False)
 
 
 def train(parser):
+    #imageの枚数
+    NUM = parser.num
+    #画像の学習サイズ
+    size = parser.size
+    #trainrate
+    trainrate = parser.trainrate
 
-    train, test = load_dataset(train_rate=parser.trainrate)
-    valid = test.devide(0, int(NUM*0.1))
-    test = test.devide(int(NUM*0.1), int(NUM*0.2))
+    train, test = load_dataset(train_rate=trainrate, size=size)
+
+    valid = train.devide(int(NUM * (trainrate - ((1-trainrate)) ) ), int(NUM*trainrate))
+    test = test.devide(0, int(NUM * (1-trainrate)))
 
     #保存ファイル
     reporter = rp.Reporter(parser=parser)
@@ -43,7 +48,7 @@ def train(parser):
     gpu = parser.gpu
 
     #model
-    model_unet = model.UNet(size=(128, 128), l2_reg=parser.l2reg).model
+    model_unet = model.UNet(size=size, l2_reg=parser.l2reg).model
 
     #誤差関数
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=model_unet.teacher,
@@ -79,13 +84,13 @@ def train(parser):
                  model_unet.is_training: False}
 
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=100)
     if  not os.path.exists("./checkpoint"):
         os.makedirs("./checkpoint")
 
     if CONTINUE:
-        if os.path.exists("./checkpoint/"+ RESTORE_MODEL):
-            saver.restore(sess, "./checkpoint/"+ RESTORE_MODEL)
+        saver.restore(sess, "./checkpoint/"+ RESTORE_MODEL)
+        print("restored")
 
     for epoch in range(epochs):
         for batch in train(batch_size=batch_size):#ここでtrainがシャッフルされる
@@ -115,8 +120,8 @@ def train(parser):
             accuracy_fig.add([accuracy_train, accuracy_test], is_update=True)
             loss_fig.add([loss_train, loss_test], is_update=True)
             if epoch % 1 == 0:
-                idx_train = random.randrange(NUM*0.8)#trainサイズ
-                idx_test = random.randrange(NUM*0.1)#validationとtest
+                idx_train = random.randrange(NUM*trainrate)#train
+                idx_test = random.randrange(NUM*(1-trainrate))#test
                 outputs_train = sess.run(model_unet.outputs,
                                          feed_dict={model_unet.inputs: [train_images_original[idx_train]],
                                                     model_unet.is_training: False})
@@ -148,7 +153,9 @@ def get_parser():
         "gpu": True,
         "augmentation":False,
         "l2reg":0.0001,
-        "trainrate":0.8
+        "trainrate":0.95,
+        "num": 10,
+        "size": (512, 512)
     })
     return args #parser.parse_args()
 
