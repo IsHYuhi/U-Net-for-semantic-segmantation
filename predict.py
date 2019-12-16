@@ -14,7 +14,7 @@ NUM = 40
 
 def load_dataset():
     loader = ld.LoaderForPredict(dir_original="data_set/test_images",
-                       init_size=(512, 512))
+                       init_size=(1024, 1024))
     return loader.get_dataset()
 
 
@@ -30,7 +30,7 @@ def implement(parser):
     gpu = parser.gpu
 
     #model
-    model_unet = model.UNet(size=(512, 512), l2_reg=parser.l2reg).model
+    model_unet = model.UNet(size=(1024, 1024), l2_reg=parser.l2reg).model
 
     # Initialize session
     gpu_config = tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.7), device_count={'GPU': 1},
@@ -51,7 +51,7 @@ def implement(parser):
     if not os.path.exists("./input"):
         os.makedirs("./input")
 
-    saver.restore(sess, "./checkpoint/save_model_512hh_epoch_210.ckpt")
+    saver.restore(sess, "./checkpoint/save_model_512new_epoch_70.ckpt")
 
 
     train_images_original = train.images_original
@@ -64,7 +64,7 @@ def implement(parser):
         outputs_train = sess.run(model_unet.outputs,
                                          feed_dict={model_unet.inputs: [train_images_original[idx_train]],
                                                     model_unet.is_training: False})
- 
+
         images_original_size = train.images_original_size
         print(images_original_size[idx_train])
 

@@ -124,15 +124,15 @@ class ImageLoader(object):
                 yield image, original_size
 
     def save_augmented_image(self, original=True):#train:jpg, label:png
-        self.flipud_images(len(self._data[0])) # 枚数が倍になる
+        #self.flipud_images(len(self._data[0])) # 枚数が倍になる
         print("flipud done")
-        self.fliplr_images(len(self._data[0])) #　枚数がさらに倍 -> 4倍
+        #self.fliplr_images(len(self._data[0])) #　枚数がさらに倍 -> 4倍
         print("fliplr done")
-        self.random_crop_images(len(self._data[0]))#double -> 8倍
+        #self.random_crop_images(len(self._data[0]))#double -> 8倍
         print("crop done")
-        self.add_salt_images(len(self._data[0])) #16倍
+        #self.add_salt_images(len(self._data[0])) #16倍
         print("salt done")
-        self.normalize_contrast_images(len(self._data[0]))#32倍
+        #self.normalize_contrast_images(len(self._data[0]))#32倍
         print("contrast done")
 
         for i in range(len(self._data[0])):
